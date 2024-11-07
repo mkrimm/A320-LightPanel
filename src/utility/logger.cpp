@@ -3,7 +3,7 @@
  * File Created: Saturday, 9th December 2023 02:22:00
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Thursday, 7th November 2024 05:25:37 pm
+ * Last Modified: Thursday, 7th November 2024 07:40:37 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2023 MK Lab & Martin Krimm
@@ -33,7 +33,7 @@ String Logger::GenerateMsgAsString(LogLevel level, String msg) {
   minutes = minutes % 60;
   hours = hours % 24;
 
-  char buffer[80];
+  char buffer[80]{};
   snprintf(buffer,
             sizeof(buffer),
             "%02ludays %02lu:%02lu:%02lu",
@@ -84,25 +84,12 @@ void Logger::ConvertMsgToChar(String log_msg, char *msg_as_char) {
 
 
 /**
- * @brief This function return the integer value of the given enum
- * @tparam Enumeration
- * @param value enum value
- * @return std::underlying_type<Enumeration>::type the integer value of the enum
- */
-// template <typename Enumeration>
-// auto as_integer(Enumeration const value)
-//   -> typename std::underlying_type<Enumeration>::type {
-//     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
-// }
-
-
-/**
  * @brief This function return the given log level as string
  * @param level level to convert into string
  * @return std::string the log level as string
  */
 String Logger::getLogLevelAsString(LogLevel level) {
-  String level_as_string = "";
+  String level_as_string{};
 
   switch (level) {
     case DEBUG:
@@ -141,7 +128,7 @@ void Logger::setLogLevel(LogLevel level) {
  * @param msg the log message
  */
 int Logger::Debug(const char *msg, ...) {
-  int ret = 0;
+  int ret{};
   if (log_level_ < INFO) {
     // Read message
     char msg_result[500];
@@ -166,7 +153,7 @@ int Logger::Debug(const char *msg, ...) {
  * @param msg the log message
  */
 int Logger::Info(const char *msg, ...) {
-  int ret = 0;
+  int ret{};
   if (log_level_ < WARN) {
     // Read message
     char msg_result[500];
@@ -191,7 +178,7 @@ return ret;
  * @param msg the log message
  */
 int Logger::Warn(const char *msg, ...) {
-  int ret = 0;
+  int ret{};
   if (log_level_ < ERROR) {
     // Read message
     char msg_result[500];
@@ -216,7 +203,7 @@ return ret;
  * @param msg the log message
  */
 int Logger::Error(const char *msg, ...) {
-  int ret = 0;
+  int ret{};
   if (log_level_ < NONE) {
     // Read message
     char msg_result[256];

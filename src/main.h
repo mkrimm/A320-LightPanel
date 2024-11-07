@@ -3,7 +3,7 @@
  * File Created: Monday, 4th November 2024 09:58:24
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Thursday, 7th November 2024 09:52:42 am
+ * Last Modified: Thursday, 7th November 2024 05:37:24 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2024 MK Lab & Martin Krimm
@@ -13,7 +13,11 @@
  * ----------	---	---------------------------------------------------------
  */
 #include <Joystick.h>
-// #define DEBUG
+
+#include "utility/logger.h"
+
+// Logger
+Logger logger_("Main", LogLevel::DEBUG);
 
 // HID report id = 0x05; you can also use JOYSTICK_DEFAULT_REPORT_ID
 Joystick_ joystick_(0x05,
@@ -21,6 +25,10 @@ Joystick_ joystick_(0x05,
   false, false, false, false, false, false,
   false, false, false, false, false);
 
+// Cycle time
+static constexpr int kCycleTime{25};
+
+// Auto send mode
 static constexpr bool kAutoSendMode{true};
 
 // Analoge input values

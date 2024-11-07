@@ -3,7 +3,7 @@
  * File Created: Sunday, 3rd November 2024 11:13:39
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Monday, 4th November 2024 03:53:27 pm
+ * Last Modified: Thursday, 7th November 2024 05:37:18 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2024 MK Lab & Martin Krimm
@@ -203,10 +203,9 @@ void EvalSwitchStates(int *pin_values, bool *button_values) {
 void SetJoystickButton(bool *buttons) {
   // Set Joystick button
   for (size_t i = 0; i < 21; ++i) {
-#ifdef DEBUG
-  Serial.println("Joystick button " + String(kButtonName[i+1]) + " value: "
-                + String(buttons[i+1]));
-#endif
+    logger_.Debug("Joystick button %s value: %i",
+                    String(kButtonName[i+1]),
+                    String(buttons[i+1]));
     joystick_.setButton(i, buttons[i+1]);
   }
 }
@@ -227,9 +226,7 @@ void setup() {
   Serial.begin(57600);
   Serial.println();
 
-#ifdef DEBUG
-  Serial.println("Debug Mode");
-#endif
+  logger_.Debug("------Debug Mode------");
 
   // Initialize Joystick Library
   if (kAutoSendMode)
@@ -245,29 +242,31 @@ void setup() {
 
 void loop() {
   int switch_analoge_values[8]{};
+  logger_.Debug("------ New loop ------");
 
   // Read analoge values
   ReadAnalogeSwitchValues(switch_analoge_values);
-#ifdef DEBUG
-  Serial.println("Loop count: " + String(millis()));
+
+  logger_.Debug("Switch analoge area size: %i", sizeof(switch_analoge_values));
+  logger_.Debug("- Analoge values -");
   // for (size_t i = 0; i < sizeof(switch_analoge_values_); ++i){
-  for (size_t i = 0; i < 8; ++i){
-    Serial.println("Input " + String(kPinName[i]) + " analoge value: "
-                    + String(switch_analoge_values[i]));
-  }
-#endif
+  for (size_t i = 0; i < 8; ++i)
+    logger_.Debug("Input %s analoge value: %i",
+                    String(kPinName[i]),
+                    String(switch_analoge_values[i]));
 
   // Eval switches
   EvalSwitchStates(switch_analoge_values, button_values_);
-#ifdef DEBUG
-  Serial.println("Loop count: " + String(millis()));
-  for (size_t i = 0; i < sizeof(button_values_); ++i){
-  // for (size_t i = 1; i < 4; ++i){
-    Serial.println("Button " + String(kButtonName[i]) + " value: "
-                    + String(button_values_[i]));
-  }
-#endif
 
+  logger_.Debug("- Button values -");
+  for (size_t i = 0; i < sizeof(button_values_); ++i){
+    logger_.Debug("Button %s value: %i",
+                    String(kButtonName[i]),
+                    String(button_values_[i]));
+  }
+
+  // Set Backlight
+  //@TODO: Implement a solution that can be controlled via an LVAR
   if (button_values_[kNavLogo1])
     SetBacklight(255);
   else if (button_values_[kNavLogoOff])
@@ -276,5 +275,5 @@ void loop() {
   // Set Joystick button
   SetJoystickButton(button_values_);
 
-  delay(25);
+  delay(kCycleTime);
 }

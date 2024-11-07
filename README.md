@@ -33,7 +33,11 @@ This project is configured so that it can be executed directly in Microsoft VS C
 Simply clone the project and open it in VS Code.
 If you do not have the [PlatformIO](https://platformio.org) extension installed, VS Code will ask you to install it.
 
-<br><br><br><br>
+The panel to be reconstructed looks as follows.
+![A320_LightPanel](doc/images/Exterior-Lighting-Panel.jpg)
+
+My replica of the panel looks like this.
+<br>
 IMAGE
 <br><br><br><br><br>
 

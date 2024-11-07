@@ -3,7 +3,7 @@
  * File Created: Thursday, 7th November 2024 06:50:35
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Thursday, 7th November 2024 07:35:33 pm
+ * Last Modified: Thursday, 7th November 2024 08:00:04 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2024 MK Lab & Martin Krimm
@@ -13,7 +13,8 @@
  * ----------	---	---------------------------------------------------------
  */
 
-#include "unity.h"
+#include <Arduino.h>
+#include <unity.h>
 #include "../../src/utility/logger.h"
 
 Logger logger_("TEST");

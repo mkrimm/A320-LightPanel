@@ -87,14 +87,15 @@ To make it as easy as possible for you to get started, you will find a [SPAD.nex
 ## Configure the project
 
 Before you build and install the project, make sure that the HID report ID matches your system.
-To check this, take a look at the file [main.h](src/main.h#L19) in line 19.
+To check this, take a look at the file [main.h](src/main.h#L23) in line 23.
 I only used `0x05` because I operate two other devices of this type.
 <br><br>
 
 
 ## Debugging
 
-If you have problems with the Arduino, you can activate [debug mode](src/main.h#L16) and use the serial monitor to see the debug messages.
+If you have problems with the Arduino, you can activate [debug mode](src/main.h#L20) in the header file and use the serial monitor to see the debug messages.
+To activate the debug mode just change the log level to `LogLevel::DEBUG`
 Example output of the debug mode.
 
 <br><br><br><br>

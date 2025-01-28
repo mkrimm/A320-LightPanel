@@ -3,7 +3,7 @@
  * File Created: Sunday, 26th January 2025 05:46:15
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Tuesday, 28th January 2025 12:15:04 pm
+ * Last Modified: Tuesday, 28th January 2025 02:27:49 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2025 MK Lab & Martin Krimm
@@ -14,8 +14,10 @@
  * 28-01-2025	MK	Init deployment
  */
 
-#include <CmdMessenger.h>
+#ifndef COM_SPADNEXT_H_
+#define COM_SPADNEXT_H_
 
+#include <CmdMessenger.h>
 
 class SpadNextCom {
 private:
@@ -32,7 +34,7 @@ private:
   enum SerialCommands {
     kInit,        // Initialization command
     kSetLed,      // Command to set LED state
-    kButtonPress  // Command to notify SPAD.neXt of button press
+    kButtonPress  // Command to notify SPAD.neXt of button states
   };
 
   static SpadNextCom *instance_;
@@ -44,5 +46,4 @@ public:
   int ModuleLoop(int *button_values, int *led_values);
 };
 
-// Initialize the static instance pointer
-SpadNextCom *SpadNextCom::instance_{nullptr};
+#endif /* COM_SPADNEXT_H_ */

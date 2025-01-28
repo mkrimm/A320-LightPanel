@@ -3,7 +3,7 @@
  * File Created: Sunday, 26th January 2025 05:46:13
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Tuesday, 28th January 2025 12:15:22 pm
+ * Last Modified: Tuesday, 28th January 2025 02:27:42 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2025 MK Lab & Martin Krimm
@@ -15,6 +15,9 @@
  */
 
 #include "SpadNextCom.h"
+
+// Initialize the static instance pointer
+SpadNextCom *SpadNextCom::instance_{nullptr};
 
 /**
  * @brief SpadNextCom::HandleMessage
@@ -33,6 +36,7 @@ void SpadNextCom::HandleMessage() {
     case SerialCommands::kSetLed : {
       int ledIndex{cmd_messenger_.readInt16Arg()};
       int ledState{cmd_messenger_.readInt16Arg()};
+      printf("LED: %d, State: %d\n", ledIndex, ledState);
       if (ledIndex >= 0 && ledIndex < static_cast<int>(led_num_)) {
         led_pins_[ledIndex] = ledState;
       }
@@ -51,7 +55,7 @@ void SpadNextCom::HandleMessage() {
  */
 int SpadNextCom::ModuleLoop(int *button_values, int *led_values) {
   int ret{};
-  // Send button press messages
+  // Send button values
   cmd_messenger_.sendCmdStart(SerialCommands::kButtonPress);
   for (size_t i = 0; i < button_num_; ++i)
     cmd_messenger_.sendCmdArg(button_values[i]);

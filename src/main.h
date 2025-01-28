@@ -3,7 +3,7 @@
  * File Created: Monday, 4th November 2024 09:58:24
  * Author: Martin Krimm (krimmmartin@gmail.com)
  * -----
- * Last Modified: Thursday, 7th November 2024 09:52:42 am
+ * Last Modified: Tuesday, 28th January 2025 02:34:40 pm
  * Modified By: Martin Krimm (krimmmartin@gmail.com)
  * -----
  * Copyright (c) 2024 MK Lab & Martin Krimm
@@ -11,49 +11,57 @@
  * HISTORY:
  * Date      	By	Comments
  * ----------	---	---------------------------------------------------------
+ * 28-01-2025	MK	Update to new SpadNext serial communication
  */
-#include <Joystick.h>
-// #define DEBUG
 
-// HID report id = 0x05; you can also use JOYSTICK_DEFAULT_REPORT_ID
-Joystick_ joystick_(0x05,
-  JOYSTICK_TYPE_JOYSTICK, 21, 0,
-  false, false, false, false, false, false,
-  false, false, false, false, false);
+#include <Arduino.h>
 
-static constexpr bool kAutoSendMode{true};
+#include "Communication/SpadNextCom.h"
 
-// Analoge input values
-static constexpr int kResistorValue{580};
-static constexpr int kResistorToleranz{static_cast<int>(
-                                        static_cast<float>(kResistorValue)
-                                        * 0.2f)};
-static constexpr int kResistorValueMaxTol{kResistorValue
-                                          + kResistorToleranz};
-static constexpr int kResistorValueMinTol{kResistorValue
-                                          - kResistorToleranz};
-static constexpr int kMaxValue{1000};
-static constexpr int kMinValue{50};
+#define DEBUG
 
-static constexpr int kStrobeF{0};
-static constexpr int kBeaconF{1};
-static constexpr int kWingF{2};
-static constexpr int kNavLogoF{3};
-static constexpr int kRwyTurnF{4};
-static constexpr int kLandLF{5};
-static constexpr int kLandRF{6};
-static constexpr int kNoseF{7};
+// Serial baud rate
+static constexpr long kSerialBaudRate{115200};
 
-static constexpr const char* kPinName[9]{"Strobe",
-                                         "Beacon",
-                                         "Wing",
-                                         "Nav&Logo",
-                                         "RwyTurnOff",
-                                         "LandL",
-                                         "LandR",
-                                         "Nose",
-                                         "Backlight"};
-static constexpr const char* kButtonName[22]{"",
+// Constant that maps the phyical pin to the joystick button
+static constexpr int kMultiplexer1S0{0};  // Button multiplexer 1 --> Input
+static constexpr int kMultiplexer1S1{1};  // Button multiplexer 1 --> Input
+static constexpr int kMultiplexer1S2{2};  // Button multiplexer 1 --> Input
+static constexpr int kMultiplexer2S0{3};  // Button multiplexer 2 --> Input
+static constexpr int kMultiplexer2S1{4};  // Button multiplexer 2 --> Input
+static constexpr int kMultiplexer2S2{5};  // Button multiplexer 2 --> Input
+static constexpr int kMultiplexer3S0{6};  // Button multiplexer 3 --> Input
+static constexpr int kMultiplexer3S1{7};  // Button multiplexer 3 --> Input
+static constexpr int kMultiplexer3S2{8};  // Button multiplexer 3 --> Input
+static constexpr int kMultiplexer4S0{9};  // LED multiplexer 1 --> Output
+static constexpr int kMultiplexer4S1{10}; // LED multiplexer 1 --> Output
+static constexpr int kMultiplexer4S2{16}; // LED multiplexer 1 --> Output
+static constexpr int kMultiplexer5S0{14}; // LED multiplexer 2 --> Output
+static constexpr int kMultiplexer5S1{15}; // LED multiplexer 2 --> Output
+static constexpr int kMultiplexer5S2{18}; // LED multiplexer 2 --> Output
+static constexpr int kBtnExtPwr{19};      // External power button --> Input
+static constexpr int kBackLightPin{20};   // Backlight pin --> Output
+
+static constexpr const char* kPinName[17]{"U1.S0",
+                                          "U1.S1",
+                                          "U1.S2",
+                                          "U2.S0",
+                                          "U2.S1",
+                                          "U2.S2",
+                                          "U3.S0",
+                                          "U3.S1",
+                                          "U3.S2",
+                                          "U4.S0",
+                                          "U4.S1",
+                                          "U4.S2",
+                                          "U5.S0",
+                                          "U5.S1",
+                                          "U5.S2",
+                                          "BtnExtPwr",
+                                          "Backlight"};
+
+static constexpr int kButtonNum{35};
+static constexpr const char* kButtonName[kButtonNum]{"",
                                              "Strobe_On",
                                              "Strobe_Auto",
                                              "Strobe_Off",
@@ -74,56 +82,39 @@ static constexpr const char* kButtonName[22]{"",
                                              "LandR_Retract",
                                              "Nose_To",
                                              "Nose_Taxi",
-                                             "Nose_Off"};
+                                             "Nose_Off",
+                                             "ExtPwr",
+                                             "ApuBleed",
+                                             "ApuMasterSwitch",
+                                             "ApuStart",
+                                             "SeatBeltOn",
+                                             "SeatBeltOff",
+                                             "SeatBeltAuto",
+                                             "NoSmokingOn",
+                                             "NoSmokingOff",
+                                             "NoSmokingAuto",
+                                             "AntiIceWing",
+                                             "AntiIceEng1",
+                                             "AntiIceEng2"};
+int button_values_[kButtonNum]{};
+
+static constexpr int kLedNum{15};
+static constexpr const char* kLedName[kLedNum]{"ExtPwrAvail",
+                                         "ExtPwrOn",
+                                         "ApuMasterFault",
+                                         "ApuMasterOn",
+                                         "ApuStartAvail",
+                                         "ApuStartOn",
+                                         "ApuBleedFault",
+                                         "ApuBleedOn",
+                                         "AntiIceWingFault",
+                                         "AntiIceWingOn",
+                                         "AntiIceEng1Fault",
+                                         "AntiIceEng1On",
+                                         "AntiIceEng2Fault",
+                                         "AntiIceEng2On",
+                                         "Backlight"};
+int led_values_[kLedNum]{};
 
 
-
-// Constant that maps the phyical pin to the joystick button
-static constexpr int kNosePin{A0};
-static constexpr int kRwyTurnOffPin{A1};
-static constexpr int kBeaconPin{A2};
-static constexpr int kWingPin{A3};
-static constexpr int kStrobePin{A6};
-static constexpr int kNavLogoPin{A7};
-static constexpr int kLandLPin{A8};
-static constexpr int kLandRPin{A9};
-static constexpr int kBackLightPin{A10};
-
-// Joystick button numbers
-// Strobe switch
-static constexpr int kStrobeOn{1};
-static constexpr int kStrobeAuto{2};
-static constexpr int kStrobeOff{3};
-
-// Beacon switch
-static constexpr int kBeaconOn{4};
-static constexpr int kBeaconOff{5};
-
-// Wing switch
-static constexpr int kWingOn{6};
-static constexpr int kWingOff{7};
-
-// Nav & Logo switch
-static constexpr int kNavLogo2{8};
-static constexpr int kNavLogo1{9};
-static constexpr int kNavLogoOff{10};
-
-// Rwy turn off switch
-static constexpr int kRwyTurnOn{11};
-static constexpr int kRwyTurnOff{12};
-
-// Landing switch
-static constexpr int kLandingLOn{13};
-static constexpr int kLandingLOff{14};
-static constexpr int kLandingLRetract{15};
-static constexpr int kLandingROn{16};
-static constexpr int kLandingROff{17};
-static constexpr int kLandingRRetract{18};
-
-// Nose switch
-static constexpr int kNoseTo{19};
-static constexpr int kNoseTaxi{20};
-static constexpr int kNoseOff{21};
-
-// Buttons
-bool button_values_[22]{};
+SpadNextCom *spad_next_com_{nullptr};
